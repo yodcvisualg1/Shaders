@@ -21,7 +21,7 @@ H:
 
 ## SHADERS IN PROCESSING
 
-Andres Colubri & Jean Pierre Charalambos
+Yesid Ochoa & Diego Garcia & Oscar Gomez
 
 H:
 
