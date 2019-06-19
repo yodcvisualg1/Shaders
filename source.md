@@ -21,19 +21,19 @@ H:
 
 ## SHADERS IN PROCESSING
 
-Yesid Ochoa & Diego Garcia & Oscar Gomez
+Yesid Ochoa & Oscar Gomez & Diego Garcia
 
 H:
 
 ## Contents
 
-1. Introduction
+1. Introducción
 <!-- .element: class="fragment" data-fragment-index="1"-->
-2. Shader design patterns
+2. Patrones de diseño de shaders
 <!-- .element: class="fragment" data-fragment-index="1"-->
 3. The chow mein can
 <!-- .element: class="fragment" data-fragment-index="1"-->
-4. Passive transformation shaders
+4. Shaders de transformación pasiva.
 <!-- .element: class="fragment" data-fragment-index="2"-->
 5. Color shaders
 <!-- .element: class="fragment" data-fragment-index="2"-->
@@ -41,9 +41,9 @@ H:
 <!-- .element: class="fragment" data-fragment-index="2"-->
 7. Light shaders
 <!-- .element: class="fragment" data-fragment-index="2"-->
-8. Convolution filters
+8. Filtros de convolución
 <!-- .element: class="fragment" data-fragment-index="2"-->
-9. Screen filters
+9. Filtros de pantalla
 <!-- .element: class="fragment" data-fragment-index="3"-->
 10. Shadertoy
 <!-- .element: class="fragment" data-fragment-index="3"-->
@@ -52,63 +52,14 @@ H:
 
 H:
 
-## Intro: What is a shader?
+## ¿Qué es un shader?
 
-<li class="fragment">A shader is a program that runs on the GPU (Graphics Processing Unit) and it is controlled by our application (for example a Processing sketch)</li>
-<li class="fragment">The language of the shaders in Processing is GLSL (OpenGL Shading Language)</li>
-
-V:
-
-## Intro: History
-
-<li class="fragment">Andres started his involvement with Processing back in 2007 with a couple of libraries called <a href="http://andrescolubri.net/glgraphics_gsvideo/" target="_blank">GLGraphics and GSVideo</a></li>
-<li class="fragment">In 2013, <a href="http://andrescolubri.net/processing-2/" target="_blank">Processing 2.0</a> was released and incorporated most of the funcionality of GLGraphics and GSVideo, including shaders, into the core of the language</li>
+<li class="fragment">Un shader es un programa que se ejecuta en la GPU (Graphics Processing Unit) <br> y es controlado por nuestra aplicación. (por ejemplo, un sketch en Processing )</li>
+<li class="fragment">El lenguage de los shaders en Processing es GLSL (OpenGL Shading Language)</li>
 
 V:
 
-## Intro: Sample projects
-### Generating Utopia, by Stefan Wagner
-
-<iframe src="//player.vimeo.com/video/74066023" width="854" height="510" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
-
-V:
-
-## Intro: Sample projects
-### Video portraits, by Sergio Albiac
-
-<iframe src="//player.vimeo.com/video/32760578" width="854" height="510" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
-
-V:
-
-## Intro: Sample projects
-### Generative Typography, by Amnon Owed
-
-<iframe src="https://player.vimeo.com/video/101383026" width="854" height="478" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
-
-V:
-
-## Intro: Sample projects
-### Unnamed soundsculpture, by Daniel Franke
-
-<iframe src="//player.vimeo.com/video/38840688" width="854" height="510" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
-
-V:
-
-## Intro: Sample projects
-### Just Cause 2 visualization, by Jim Blackhurst
-
-<iframe width="854" height="510" src="//www.youtube.com/embed/hEoxaGkNcrg" frameborder="0" allowfullscreen></iframe>
-
-V:
-
-## Intro: Sample projects
-### Latent State, thesis project
-
-<iframe src="//player.vimeo.com/video/4806038" width="854" height="469" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
-
-V:
-
-## Intro: The graphics pipeline
+## El canal de gráficos
 
 <div class="ulist">
     <img src="fig/pipeline.png" alt="pipeline" width="55%" style="float: right">
@@ -120,16 +71,16 @@ V:
 
 V:
 
-## Intro: Shaders GPU execution
+## Ejecución Shaders GPU 
 
-The vertex shader is run on *each vertex* sent from the sketch:
+El vertex shader se ejecuta en *cada vertice* enviado desde el sketch:
 
 ```python
 for vertex in geometry:
     vertex_shader(vertex)
 ```
 
-The fragment shader is run on *each pixel* covered by the geometry in our sketch:
+El fragment shader se ejecuta en *cada pixel* cubierto por la geometria en nuestro sketch:
 
 ```python
 for pixel in screen:
@@ -139,11 +90,11 @@ for pixel in screen:
 
 V:
 
-## Intro: Shader variable types
+## Tipos de variables Shader
 
-<li class="fragment">*Uniform* variables are those that remain constant for each vertex in the scene, for example the _projection_ and _modelview_ matrices</li>
-<li class="fragment">*Attribute* variables are defined per each vertex, for example the _position_, _normal_, and _color_</li>
-<li class="fragment">*Varying* variables allows to relate a vertex attribute to a fragment, using interpolation</li>
+<li class="fragment">*Uniform* variables son aquellas que permanecen constantes para cada vértice en la escena, <br> por ejemplo las matrices _projection_ y _modelview_.</li>
+<li class="fragment">*Attribute* variables se definen para cada vértice, por ejemplo _posicion_, _normal_, y _color_.</li>
+<li class="fragment">*Varying* variables  permiten relacionar un atributo de vértice con un fragmento, mediante interpolación.</li>
 
 N:
 
@@ -151,7 +102,7 @@ N:
 
 V:
 
-## Intro: Shader example
+## Ejemplo Shader
 
 [Nub picking buffer fragment shader](https://github.com/nakednous/nub/blob/master/data/PickingBuffer.frag)
 
@@ -162,29 +113,15 @@ V:
 
 V:
 
-## Intro: Shader example
+## Processing shader API: [PShader](https://processing.org/reference/PShader.html)
 
-[Nub picking buffer fragment shader](https://github.com/nakednous/nub/blob/master/data/PickingBuffer.frag)
-
-```glsl
-uniform vec3 id;
-
-void main() {
-  gl_FragColor = vec4(id, 1.0);
-}
-```
+> Clase que encapsula un programa de sombreado GLSL, incluyendo un vertex shader y un fragment shader
 
 V:
 
-## Intro: Processing shader API: [PShader](https://processing.org/reference/PShader.html)
+## Processing shader API: [loadShader()](https://processing.org/reference/loadShader_.html)
 
-> Class that encapsulates a GLSL shader program, including a vertex and a fragment shader
-
-V:
-
-## Intro: Processing shader API: [loadShader()](https://processing.org/reference/loadShader_.html)
-
-> Loads a shader into the PShader object
+> Carga un shader en el objeto PShader
 
 Method signatures
 
@@ -194,7 +131,7 @@ Method signatures
 ```
 <!-- .element: class="fragment" data-fragment-index="1"-->
 
-Example
+Ejemplo
 
 ```processing
   PShader unalShader;
@@ -208,9 +145,9 @@ Example
 
 V:
 
-## Intro: Processing shader API: [shader()](https://processing.org/reference/shader_.html)
+## Processing shader API: [shader()](https://processing.org/reference/shader_.html)
 
-> Applies the specified shader
+>Aplica el shader especificado.
 
 Method signature
 
@@ -219,7 +156,7 @@ Method signature
 ```
 <!-- .element: class="fragment" data-fragment-index="1"-->
 
-Example
+Ejemplo
 
 ```processing
   PShader simpleShader, unalShader;
@@ -235,9 +172,9 @@ Example
 
 V:
 
-## Intro: Processing shader API: [resetShader()](https://processing.org/reference/resetShader_.html)
+## Processing shader API: [resetShader()](https://processing.org/reference/resetShader_.html)
 
-> Restores the default shaders
+> Restaura los shaders predeterminados.
 
 Method signatures
 
@@ -246,7 +183,7 @@ Method signatures
 ```
 <!-- .element: class="fragment" data-fragment-index="1"-->
 
-Example
+Ejemplo
 
 ```processing
   PShader simpleShader;
@@ -262,11 +199,11 @@ Example
 
 V:
 
-## Intro: Processing shader API: [PShader.set()](https://processing.org/reference/PShader_set_.html)
+## Processing shader API: [PShader.set()](https://processing.org/reference/PShader_set_.html)
 
-> Sets the uniform variables inside the shader to modify the effect while the program is running
+> Establece las variables uniform dentro del shaders para modificar el efecto mientras el programa se está ejecutando.
 
-Method signatures for vector uniform variables [vec2, vec3 or vec4](https://www.khronos.org/opengl/wiki/Data_Type_%28GLSL%29#Vectors):
+Method signatures para variables uniformes vectoriales [vec2, vec3 o vec4](https://www.khronos.org/opengl/wiki/Data_Type_%28GLSL%29#Vectors):
 
 ```processing
   .set(name, x)
@@ -276,17 +213,17 @@ Method signatures for vector uniform variables [vec2, vec3 or vec4](https://www.
   .set(name, vec)
 ```
 
-* *name*: of the uniform variable to modify
-* *x*, *y*, *z* and *w*: 1st, snd, 3rd and 4rd vec float components resp.
+* *name*: de la variable uniforme a modificar
+* *x*, *y*, *z* and *w*: 1st, 2nd, 3rd and 4rd vec float components resp.
 * *vec*: PVector
 
 V:
 
-## Intro: Processing shader API: [PShader.set()](https://processing.org/reference/PShader_set_.html)
+## Processing shader API: [PShader.set()](https://processing.org/reference/PShader_set_.html)
 
-> Sets the uniform variables inside the shader to modify the effect while the program is running
+> Establece las variables uniform dentro del shaders para modificar el efecto mientras el programa se está ejecutando.
 
-Method signatures for vector uniform variables [boolean[], float[], int[]](https://www.khronos.org/opengl/wiki/Data_Type_%28GLSL%29#Arrays):
+Method signaturespara variables uniformes vectoriales [boolean[], float[], int[]](https://www.khronos.org/opengl/wiki/Data_Type_%28GLSL%29#Arrays):
 
 ```processing
   .set(name, x)
@@ -296,33 +233,33 @@ Method signatures for vector uniform variables [boolean[], float[], int[]](https
   .set(name, vec)
 ```
 
-* *name*: of the uniform variable to modify
-* *x*, *y*, *z* and *w*: 1st, snd, 3rd and 4rd vec (boolean, float or int) components resp.
+* *name*: de la variable uniforme a modificar
+* *x*, *y*, *z* y *w*: 1st, 2nd, 3rd and 4rd vec (boolean, float or int) components resp.
 * *vec*: boolean[], float[], int[]
 
 V:
 
-## Intro: Processing shader API: [PShader.set()](https://processing.org/reference/PShader_set_.html)
+## Processing shader API: [PShader.set()](https://processing.org/reference/PShader_set_.html)
 
-> Sets the uniform variables inside the shader to modify the effect while the program is running
+> Establece las variables uniform dentro del shaders para modificar el efecto mientras el programa se está ejecutando.
 
-Method signatures for [mat3 and mat4](https://www.khronos.org/opengl/wiki/Data_Type_%28GLSL%29#Matrices) uniform variables:
+Method signatures para [mat3 y mat4](https://www.khronos.org/opengl/wiki/Data_Type_%28GLSL%29#Matrices) uniform variables:
 
 ```processing
   .set(name, mat) // mat is PMatrix2D, or PMatrix3D
 ```
 
-* *name* of the uniform variable to modify
-* *mat* PMatrix3D, or PMatrix2D
+* *name* de la variable uniforme a modificar
+* *mat* PMatrix3D, o PMatrix2D
 
 V:
 
-## Intro: Shaders
+## Shaders
 ### Processing shader API: [PShader.set()](https://processing.org/reference/PShader_set_.html)
 
-> Sets the uniform variables inside the shader to modify the effect while the program is running
+> Establece las variables uniform dentro del shaders para modificar el efecto mientras el programa se está ejecutando.
 
-Method signatures for _texture_ uniform variables:
+Method signatures para variable _texture_ uniform:
 
 ```processing
   .set(name, tex) // tex is a PImage
@@ -330,11 +267,11 @@ Method signatures for _texture_ uniform variables:
 
 V:
 
-## Intro: Processing shader API: [PShader.set()](https://processing.org/reference/PShader_set_.html)
+## Processing shader API: [PShader.set()](https://processing.org/reference/PShader_set_.html)
 
-> Sets the uniform variables inside the shader to modify the effect while the program is running
+> Establece las variables uniform dentro del shaders para modificar el efecto mientras el programa se está ejecutando.
 
-Example to set `mat4` uniform variables:
+Ejemplo para establecer variable uniform `mat4`:
 
 ```processing
   PShader unalShader;
