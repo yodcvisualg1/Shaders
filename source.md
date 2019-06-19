@@ -33,18 +33,8 @@ H:
 <!-- .element: class="fragment" data-fragment-index="1"-->
 3. The chow mein can
 <!-- .element: class="fragment" data-fragment-index="1"-->
-4. Shaders de transformación pasiva
-<!-- .element: class="fragment" data-fragment-index="2"-->
-5. Color shaders
-<!-- .element: class="fragment" data-fragment-index="2"-->
-6. Texture shaders
-<!-- .element: class="fragment" data-fragment-index="2"-->
-7. Light shaders
-<!-- .element: class="fragment" data-fragment-index="2"-->
-8. Filtros de convolución
-<!-- .element: class="fragment" data-fragment-index="2"-->
-9. Filtros de pantalla
-<!-- .element: class="fragment" data-fragment-index="3"-->
+4. Filtros de convolución
+<!-- .element: class="fragment" data-fragment-index="1"-->
 
 
 H:
@@ -278,7 +268,7 @@ H:
 ## Patrones de diseño de shaders
 
 1. Datos enviados desde el sketch a los shaders. <!-- .element: class="fragment" data-fragment-index="1"-->
-2. Pasando datos entre los shaders. <!-- .element: class="fragment" data-fragment-index="2"-->
+2. Pasando datos entre los shaders. <!-- .element: class="fragment" data-fragment-index="1"-->
 
 V:
 
@@ -436,571 +426,7 @@ V:
 
 H:
 
-## Passive transformation shaders
-
-<figure>
-    <img height="400" src="fig/transformations.png">
-    <figcaption>Passive transformation shaders output (source code available [here](https://github.com/VisualComputing/Shaders/tree/gh-pages/sketches/desktop/PassiveTransformations))</figcaption>
-</figure>
-
-V:
-
-## Passive transformation shaders: Design patterns
-
-> Pattern 1: Data sent from the sketch to the shaders
-
-([vert.glsl](https://github.com/VisualComputing/Shaders/blob/gh-pages/sketches/desktop/PassiveTransformations/data/vert.glsl) excerpt)
-```glsl
-...
-uniform mat4 nub_transform;
-attribute vec4 vertex;
-
-void main() {
-  gl_Position = nub_transform * vertex;
-  ...
-}
-```
-
-V:
-
-## Passive transformation shaders: Design patterns
-### [PassiveTransformations sketch](https://github.com/VisualComputing/Shaders/blob/gh-pages/sketches/desktop/PassiveTransformations/PassiveTransformations.pde)
-
-A custom [MatrixHandler](https://visualcomputing.github.io/nub-javadocs/nub/core/MatrixHandler.html) is implemented to pass the nub `transform` matrix to a custom shader
-
-```java
-// excerpt of PassiveTransformations.pde
-
-Graph graph;
-Node[] nodes;
-PShader shader;
-
-void setup() {
-  graph = new Graph(g, width, height);
-  graph.setMatrixHandler(new MatrixHandler() {
-    @Override
-    protected void _setUniforms() {
-      shader(shader);
-      Scene.setUniform(shader, "nub_transform", transform());
-    }
-  });
-  ...
-  //discard Processing matrices
-  resetMatrix();
-  shader = loadShader("frag.glsl", "vert.glsl");
-}
-
-void draw() {
-  background(0);
-  // sets up the initial nub matrices according to user interaction
-  graph.preDraw();
-  graph.traverse();
-}
-```
-
-H:
-
-## Color shaders
-
-<figure>
-    <img height="400" src="fig/color.png">
-    <figcaption>Color shader output (source code available [here](https://github.com/codeanticode/pshader-tutorials/tree/master/intro/Ex_04_2_color))</figcaption>
-</figure>
-
-V:
-
-## Color shaders: Design patterns
-
-> Pattern 1: Data sent from the sketch to the shaders
-
-([colorvert.glsl](https://github.com/codeanticode/pshader-tutorials/blob/master/intro/Ex_04_2_color/data/colorvert.glsl) excerpt)
-```glsl
-...
-attribute vec4 color;
-```
-
-V:
-
-## Color shaders: Design patterns
-
-> Pattern 2: Passing data among shaders
-
-([colorvert.glsl](https://github.com/codeanticode/pshader-tutorials/blob/master/intro/Ex_04_2_color/data/colorvert.glsl) excerpt)
-```glsl
-attribute vec4 color;
-varying vec4 vertColor;
-void main() {
-  ...
-  vertColor = color;
-}
-```
-<!-- .element: class="fragment" data-fragment-index="1"-->
-
-([colorfrag.glsl](https://github.com/codeanticode/pshader-tutorials/blob/master/intro/Ex_04_2_color/data/colorfrag.glsl) excerpt)
-```glsl
-varying vec4 vertColor;
-void main() {
-  gl_FragColor = vertColor;
-}
-```
-<!-- .element: class="fragment" data-fragment-index="2"-->
-
-H:
-
-## Texture shaders
-### Simple texture
-
-<figure>
-    <img height="400" src="fig/chowmein.png">
-    <figcaption>Texture shader output (source code available [here](https://github.com/codeanticode/pshader-tutorials/tree/master/intro/Ex_05_1_texture))</figcaption>
-</figure>
-
-V:
-
-## Texture shaders: Design patterns
-### Simple texture
-
-> Pattern 1: Data sent from the sketch to the shaders
-
-```glsl
-//excerpt from texvert.glsl
-uniform mat4 texMatrix;
-attribute vec2 texCoord;
-```
-<!-- .element: class="fragment" data-fragment-index="1"-->
-
-```glsl
-//excerpt from texfrag.glsl
-uniform sampler2D texture;
-...
-```
-<!-- .element: class="fragment" data-fragment-index="2"-->
-
-V:
-
-## Texture shaders: Design patterns
-### Simple texture
-
-> Pattern 2: Passing data among shaders
-
-```glsl
-//excerpt from texvert.glsl
-uniform mat4 texMatrix;
-attribute vec2 texCoord;
-varying vec4 vertTexCoord;
-void main() {
-  ...
-  vertTexCoord = texMatrix * vec4(texCoord, 1.0, 1.0);
-}
-```
-
-> texMatrix rescales the texture coordinates (texCoord): inversion along the Y-axis, and non-power-of-two textures
-<!-- .element: class="fragment" data-fragment-index="1"-->
-
-V:
-
-## Texture shaders: Design patterns
-### Simple texture
-
-> Pattern 2: Passing data among shaders
-
-```glsl
-//excerpt from texfrag.glsl
-uniform sampler2D texture;
-varying vec4 vertColor;
-varying vec4 vertTexCoord;
-
-void main() {
-  gl_FragColor = texture2D(texture, vertTexCoord.st) * vertColor;
-}
-```
-
-N:
-
-The texture * vertColor product is consistent:
-* vertColor is in [0..1]
-* texture2D(texture, vertTexCoord.st) is also in [0..1]
-
-V:
-
-## Texture shaders
-### Pixelation effect
-
-<figure>
-    <img height="400" src="fig/bintex.png">
-    <figcaption>Pixelation shader output (source code available [here](https://github.com/VisualComputing/Shaders/blob/gh-pages/sketches/desktop/Pixelator))</figcaption>
-</figure>
-
-V:
-
-## Texture shaders
-### Pixelation effect
-
-We can sample the texels in virtually any way we want, and this allow us to create different types of effects
-
-E.g., we can discretize the texture coords in the fragment shader as follows:
-<!-- .element: class="fragment" data-fragment-index="1"-->
-
-```glsl
-uniform sampler2D texture;
-
-varying vec4 vertColor;
-varying vec4 vertTexCoord;
-
-void main() {
-  int si = int(vertTexCoord.s * 50.0);
-  int sj = int(vertTexCoord.t * 50.0);  
-  gl_FragColor = texture2D(texture, vec2(float(si) / 50.0, float(sj) / 50.0)) * vertColor;  
-}
-```
-<!-- .element: class="fragment" data-fragment-index="1"-->
-
-V:
-
-## Texture shaders
-### Pixelation effect
-
-The constant 50 can be converted into an *uniform* variable (```binsize```):
-
-```java
-//Pixelator.pde
-PImage label;
-PShape can;
-float angle;
-
-PShader pixelator;
-
-void setup() {
-  size(640, 360, P3D);  
-  label = loadImage("lachoy.jpg");
-  can = createCan(100, 200, 32, label);
-  pixelator = loadShader("pixel.glsl");
-}
-
-void draw() {    
-  background(0);
-
-  pixelator.set("binsize", 100.0 * float(mouseX) / width);
-  shader(pixelator);
-    
-  translate(width/2, height/2);
-  rotateY(angle);  
-  shape(can);  
-  angle += 0.01;
-}
-
-PShape createCan(float r, float h, int detail, PImage tex) {
-  textureMode(NORMAL);
-  PShape sh = createShape();
-  sh.beginShape(QUAD_STRIP);
-  sh.noStroke();
-  sh.texture(tex);
-  for (int i = 0; i <= detail; i++) {
-    float angle = TWO_PI / detail;
-    float x = sin(i * angle);
-    float z = cos(i * angle);
-    float u = float(i) / detail;
-    sh.normal(x, 0, z);
-    sh.vertex(x * r, -h/2, z * r, u, 0);
-    sh.vertex(x * r, +h/2, z * r, u, 1);    
-  }
-  sh.endShape(); 
-  return sh;
-}
-```
-
-V:
-
-## Texture shaders
-### Pixelation effect
-
-```glsl
-//pixel.glsl
-uniform sampler2D texture;
-
-varying vec4 vertColor;
-varying vec4 vertTexCoord;
-
-uniform float binsize;
-
-void main() {
-  int si = int(vertTexCoord.s * binsize);
-  int sj = int(vertTexCoord.t * binsize);  
-  gl_FragColor = texture2D(texture, vec2(float(si) / binsize, float(sj) / binsize)) * vertColor;  
-}
-```
-
-H:
-
-## Light shaders
-### Simple lighting models
-
-Simple lighting models of a 3D scene involves at least:
-
-1. (optionally) Taking into account ambient light
-2. Placing one or more light sources in the space
-3. Defining their parameters, such as type (point, spotlight) and color (diffuse, specular)
-
-Assumption: light source that light equally in all directions
-<!-- .element: class="fragment" data-fragment-index="1"-->
-
-V:
-
-## Light shaders
-### Lighting parameters: diffuse light
-
-<figure>
-    <img height="400" src="fig/lighting.png">
-    <figcaption>Diffuse light: `$I = direction \bullet normal$`</figcaption>
-</figure>
-
-V:
-
-## Light shaders
-### Lighting parameters: diffuse light
-
-<figure>
-    <img height="400" src="fig/diffuse.png">
-    <figcaption>Diffuse light: `$I = direction \bullet normal$`</figcaption>
-</figure>
-
-V:
-
-## Light shaders
-### Lighting parameters: per vertex diffuse light
-
-<figure>
-    <img height="400" src="fig/vertlight.png">
-    <figcaption>Per vertex diffuse light shader output (source code available [here](https://github.com/codeanticode/pshader-tutorials/blob/master/intro/Ex_06_1_light/))</figcaption>
-</figure>
-
-V:
-
-## Light shaders: Design patterns
-### Lighting parameters: per vertex diffuse light
-
-> Pattern 1: Data sent from the sketch to the shaders
-
-```glsl
-//excerpt from lightvert.glsl
-uniform mat4 modelview;
-uniform mat3 normalMatrix;
-uniform vec4 lightPosition;
-
-attribute vec4 position;
-attribute vec4 color;
-attribute vec3 normal;
-```
-
-V:
-
-## Light shaders: Design patterns
-### Lighting parameters: per vertex diffuse light
-#### Observation about the [normal matrix](http://www.lighthouse3d.com/tutorials/glsl-12-tutorial/the-normal-matrix/)
-
-Let $M$ be $ModelView(4;4)$ (i.e., it is formed by deleting row and column 4 from the ModelView)
-
-> Multiplying the input ```normal``` vector by the ```normalMatrix```, i.e., `$({M^{-1})}^T$`, yields its coordinates in the eye-space
-
-V:
-
-## Light shaders: Design patterns
-### Lighting parameters: per vertex diffuse light
-#### Observation about the [normal matrix](http://www.lighthouse3d.com/tutorials/glsl-12-tutorial/the-normal-matrix/)
-
-Why not use ```modelview``` matrix, instead of ```normalMatrix``` (`$({M^{-1})}^T$`)?
-
-<figure>
-    <img height="300" src="fig/normalmatrix.png">
-    <figcaption>`$N * modelview$` when the matrix contains a non-uniform scale</figcaption>
-</figure>
-<!-- .element: class="fragment" data-fragment-index="1"-->
-
-V:
-
-## Light shaders: Design patterns
-### Lighting parameters: per vertex diffuse light
-
-> Pattern 2: Passing data among shaders
-
-> Pattern 3: Consistency of geometry operations
-
-```glsl
-//excerpt from lightvert.glsl
-uniform vec4 lightPosition;
-varying vec4 vertColor;
-
-void main() {
-  ...
-  vec3 ecPosition = vec3(modelview * position);//eye coordinate system
-  vec3 ecNormal = normalize(normalMatrix * normal);//eye coordinate system
-  vec3 direction = normalize(lightPosition.xyz - ecPosition);//Pattern 3   
-  float intensity = max(0.0, dot(direction, ecNormal));//Pattern 3
-  vertColor = vec4(intensity, intensity, intensity, 1) * color;
-}
-```
-
-V:
-
-## Light shaders: Design patterns
-### Lighting parameters: per vertex diffuse light
-
-> Pattern 2: Passing data among shaders
-
-```glsl
-//lightfrag.glsl
-varying vec4 vertColor;
-
-void main() {
-  gl_FragColor = vertColor;
-}
-```
-
-V:
-
-## Light shaders
-### Lighting parameters: per pixel diffuse light
-
-<figure>
-    <img height="400" src="fig/pixlight.png">
-    <figcaption>Per pixel diffuse light shader output (source code available [here](https://github.com/codeanticode/pshader-tutorials/blob/master/intro/Ex_06_2_pixlight/))</figcaption>
-</figure>
-
-V:
-
-## Light shaders: Design patterns
-### Lighting parameters: per pixel diffuse light
-
-> Pattern 1: Data sent from the sketch to the shaders
-
-```glsl
-//excerpt from pixlightvert.glsl
-uniform mat4 modelview;
-uniform mat3 normalMatrix;
-uniform vec4 lightPosition;
-
-attribute vec4 position;
-attribute vec4 color;
-attribute vec3 normal;
-```
-
-V:
-
-## Light shaders: Design patterns
-### Lighting parameters: per pixel diffuse light
-
-> Pattern 2: Passing data among shaders
-
-> Pattern 3: Consistency of geometry operations
-
-```glsl
-//excerpt from pixlightvert.glsl
-varying vec4 vertColor;
-varying vec3 ecNormal;
-varying vec3 lightDir;
-
-void main() {
-  ...
-  vec3 ecPosition = vec3(modelview * position);
-  ecNormal = normalize(normalMatrix * normal);
-  lightDir = normalize(lightPosition.xyz - ecPosition);//Pattern 3
-  vertColor = color;
-}
-```
-
-V:
-
-## Light shaders: Design patterns
-### Lighting parameters: per pixel diffuse light
-
-> Pattern 2: Passing data among shaders
-
-> Pattern 3: Consistency of geometry operations
-
-```glsl
-//pixlightfrag.glsl
-varying vec4 vertColor;
-varying vec3 ecNormal;
-varying vec3 lightDir;
-
-void main() {  
-  vec3 direction = normalize(lightDir);
-  vec3 normal = normalize(ecNormal);
-  float intensity = max(0.0, dot(direction, normal));//Pattern 3
-  gl_FragColor = vec4(intensity, intensity, intensity, 1) * vertColor;
-}
-```
-
-V:
-
-## Light shaders
-### Lighting params: specular light ([Phong model](https://en.wikipedia.org/wiki/Phong_reflection_model))
-
-<figure>
-    <img height="400" src="fig/phong.png">
-    <figcaption>Specular light: `$I = direction_{reflected} \bullet observer$`</figcaption>
-</figure>
-
-V:
-
-## Light shaders
-### Lighting parameters: specular light
-
-<figure>
-    <img height="400" src="fig/specular.png">
-    <figcaption>Specular light: `$I = direction_{reflected} \bullet observer$`</figcaption>
-</figure>
-
-V:
-
-## Light shaders
-### Lighting parameters: per vertex specular light
-
-<figure>
-    <img height="400" src="fig/vert_spec.png">
-    <figcaption>Per vertex specular light shader output (source code available [here](https://github.com/VisualComputing/Shaders/tree/gh-pages/sketches/desktop/Specular))</figcaption>
-</figure>
-
-V:
-
-## Light shaders
-### Lighting parameters: per vertex specular light
-
-> Identifying the per vertex specular shader design patterns is left as an excercise to the reader
-
-V:
-
-## Light shaders
-### Lighting parameters: per pixel specular light
-
-<figure>
-    <img height="400" src="fig/frag_spec.png">
-    <figcaption>Per pixel specular light shader output (source code available [here](https://github.com/VisualComputing/Shaders/tree/gh-pages/sketches/desktop/PixSpecular))</figcaption>
-</figure>
-
-V:
-
-## Light shaders
-### Lighting parameters: per pixel specular light
-
-> Identifying the per pixel specular shader design patterns is left as an excercise to the reader
-
-V:
-
-## Light shaders
-### Suggested workshop
-
-> Simple lighting and material
-
-Tasks
-
-1. Combine all the simple lighting models using per-vertex and per-pixel shaders
-2. Use up to 8 lights in the model
-3. Implement other simple light model such as [normal mapping]() or [Warn lights](https://books.google.com.co/books?id=pCwwxlMuNycC&pg=PA113&lpg=PA113&dq=shader+warn+light+model&source=bl&ots=vVu814VVAU&sig=nKGlD6fpT6pl5U1GUcdhIJxEQQQ&hl=en&sa=X&ved=0ahUKEwipp_bQ9e3TAhVEPiYKHS5wC3wQ6AEIJTAA#v=onepage&q=shader%20warn%20light%20model&f=false)
-
-H:
-
-## Convolution filters
+## Filtros de convolución
 ### Overview
 
 <figure>
@@ -1010,9 +436,9 @@ H:
 
 V:
 
-## Convolution filters: Design patterns
+## Filtros de convolución: Patrones de diseño
 
-> Pattern 2: Passing data among shaders
+> Patron 2: Pasando datos entre los shaders
 
 ```glsl
 //excerpt from fragment shader
@@ -1021,14 +447,14 @@ varying vec4 vertTexCoord;
 ...
 ```
 
-There's no need to override the vertex shader, becasuse the default one will emit the needed varying variables
+No es necesario sobreescribir el vertex shader, ya que el predeterminado emitirá las variables varying.
 <!-- .element: class="fragment" data-fragment-index="1"-->
 
 V:
 
-## Convolution filters: Design patterns
+## Filtros de convolución: Patrones de diseño
 
-> Pattern 1: Data sent from the sketch to the shaders
+> Patrón 1: Datos enviados desde el sketch a los shaders
 
 ```glsl
 //excerpt from fragment shader
@@ -1048,16 +474,16 @@ is the texel exactly one position to the right
 
 V:
 
-## Convolution filters: Edge detection
+## Filtros de convolución: Deteccion de bordes
 
 <figure>
     <img height="400" src="fig/edges.png">
-    <figcaption>Edge detection filter (source code available [here](https://github.com/codeanticode/pshader-tutorials/tree/master/intro/Ex_08_2_edges))</figcaption>
+    <figcaption>Filtro de deteccion de bordes (source code available [here](https://github.com/codeanticode/pshader-tutorials/tree/master/intro/Ex_08_2_edges))</figcaption>
 </figure>
 
 V:
 
-## Convolution filters: Edge detection
+## Filtros de convolución: Deteccion de bordes
 ### Convolution kernel
 
 `$\begin{bmatrix}
@@ -1068,7 +494,7 @@ V:
 
 V:
 
-## Convolution filters: Edge detection
+## Filtros de convolución: Deteccion de bordes
 ### Shader
 
 ```glsl
@@ -1108,7 +534,7 @@ void main() {
 
 V:
 
-## Convolution filters: Sharpen
+## Filtros de convolución: Sharpen
 
 <figure>
     <img height="400" src="fig/sharpen.png">
@@ -1117,7 +543,7 @@ V:
 
 V:
 
-## Convolution filters: Sharpen
+## Filtros de convolución: Sharpen
 ### Convolution kernel
 
 `$\begin{bmatrix}
@@ -1128,7 +554,7 @@ V:
 
 V:
 
-## Convolution filters: Sharpen
+## Filtros de convolución: Sharpen
 ### Shader
 
 ```glsl
@@ -1167,48 +593,15 @@ void main() {
 
 V:
 
-## Convolution filters
-### Suggested workshop
+## Filtros de convolución
 
-> Convolution filters
+> Filtros de convolución
 
-Tasks
 
-1. Support some common [convolution kernels](https://en.wikipedia.org/wiki/Kernel_(image_processing) using fragment shaders
-2. Allow customization of convolution kernels
-3. Filter both image and video files
+1. Soportar algunos [nucleos de convolucion](https://en.wikipedia.org/wiki/Kernel_(image_processing) usando fragment shaders
+2. Permitir la personalización de los núcleos de convolución.
+3. Filtrar archivos de imagen y video
 
-Idea for a project: use the [(fast) Fourier transform](http://lodev.org/cgtutor/filtering.html) to fast apply the filters
-
-H:
-
-## Screen filters
-### Using fragment shaders
-
-To apply any of the image post-processing effects to an arbitrary
-Processing sketch call ```filter(PShader shader)``` after your drawing
-
-For example, to apply the [sharpen shader as a screen filter](https://github.com/VisualComputing/Shaders/tree/gh-pages/sketches/desktop/ScreenFilter):
-
-```java
-PShader sharpen;
-
-void setup() {
-  size(400, 400, P3D); 
-  sharpen = loadShader("sharpen.glsl");  
-}
-
-void draw() {
-  background(150);
-  lights();
-  translate(width/2, height/2);
-  rotateX(frameCount * 0.01);
-  rotateY(frameCount * 0.01);
-  box(100);
-
-  filter(sharpen);
-}
-```
 
 H:
 
